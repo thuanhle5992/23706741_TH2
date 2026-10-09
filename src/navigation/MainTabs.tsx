@@ -1,7 +1,7 @@
 import React from 'react';
 import {createBottomTabNavigator} from '@react-navigation/bottom-tabs';
 
-import HomeScreen from '@screens/HomeScreen';
+import ShopStack from '@navigation/ShopStack';
 import CartScreen from '@screens/CartScreen';
 import MeScreen from '@screens/MeScreen';
 
@@ -12,9 +12,10 @@ export default function MainTabs() {
     <Tab.Navigator>
       <Tab.Screen
         name="Shop"
-        component={HomeScreen}
+        component={ShopStack}
         options={{
           title: 'Cửa hàng',
+          headerShown: false,
         }}
       />
 
