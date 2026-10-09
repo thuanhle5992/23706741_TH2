@@ -1,5 +1,6 @@
 import React from 'react';
 import {
+  GestureResponderEvent,
   Image,
   Pressable,
   StyleSheet,
@@ -8,67 +9,62 @@ import {
 } from 'react-native';
 import * as Haptics from 'expo-haptics';
 
-import {COLORS, RADIUS, SPACING} from '@constants/theme';
 import {VARIANT} from '@constants/student';
+import {COLORS, RADIUS, SPACING} from '@constants/theme';
+import type {Product} from '@services/productApi';
 import {useCartStore} from '@stores/cartStore';
 
-export type Product = {
-  id: string;
-  name: string;
-  price: number;
-  image: string;
-};
+export type {Product} from '@services/productApi';
 
 type ProductCardProps = {
   product: Product;
   onPress: () => void;
 };
 
-export default function ProductCard({
-  product,
-  onPress,
-}: ProductCardProps) {
-  const add = useCartStore(state => state.add);
+export function ProductCard({product, onPress}: ProductCardProps) {
+  const addItem = useCartStore(state => state.addItem);
 
-  const handleAdd = () => {
-    add(product);
-
-    if (VARIANT.hapticOnAdd === 'selection') {
-      Haptics.selectionAsync();
-    } else {
-      Haptics.impactAsync(
-        Haptics.ImpactFeedbackStyle.Medium,
-      );
+  const triggerHaptic = () => {
+    try {
+      if (VARIANT.hapticOnAdd === 'selection') {
+        Haptics.selectionAsync();
+      } else {
+        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+      }
+    } catch {
+      // Bỏ qua nếu môi trường không hỗ trợ haptics
     }
   };
 
+  const handleAdd = (e: GestureResponderEvent) => {
+    e.stopPropagation?.();
+    addItem(product);
+    triggerHaptic();
+  };
+
   return (
-    <Pressable
-      style={styles.card}
-      onPress={onPress}>
+    <Pressable style={styles.card} onPress={onPress}>
       <Image
         source={{uri: product.image}}
         style={styles.image}
+        resizeMode="contain"
       />
 
-      <View style={styles.content}>
-        <Text
-          style={styles.name}
-          numberOfLines={2}>
-          {product.name}
+      <Text style={styles.title} numberOfLines={2}>
+        {product.title}
+      </Text>
+
+      <View style={styles.bottomRow}>
+        <Text style={styles.price}>
+          {product.price.toLocaleString('vi-VN')} đ
         </Text>
 
-        <View style={styles.bottomRow}>
-          <Text style={styles.price}>
-            {product.price.toLocaleString('vi-VN')} đ
-          </Text>
-
-          <Pressable
-            style={styles.addButton}
-            onPress={handleAdd}>
-            <Text style={styles.addText}>+</Text>
-          </Pressable>
-        </View>
+        <Pressable
+          style={styles.addButton}
+          onPress={handleAdd}
+          hitSlop={8}>
+          <Text style={styles.addText}>+</Text>
+        </Pressable>
       </View>
     </Pressable>
   );
@@ -77,50 +73,57 @@ export default function ProductCard({
 const styles = StyleSheet.create({
   card: {
     flex: 1,
-    margin: SPACING.sm,
+    margin: SPACING.xs,
+    padding: SPACING.md,
     backgroundColor: COLORS.surface,
     borderRadius: RADIUS.md,
-    overflow: 'hidden',
     borderWidth: 1,
     borderColor: COLORS.border,
+    justifyContent: 'space-between',
   },
+
   image: {
     width: '100%',
-    aspectRatio: 1,
-    backgroundColor: COLORS.background,
+    height: 120,
+    marginBottom: SPACING.sm,
+    backgroundColor: '#FFFFFF',
   },
-  content: {
-    padding: SPACING.md,
-  },
-  name: {
-    fontSize: 15,
-    fontWeight: '600',
+
+  title: {
+    minHeight: 38,
     color: COLORS.text,
+    fontSize: 13,
+    fontWeight: '600',
+    lineHeight: 18,
   },
+
   bottomRow: {
-    marginTop: SPACING.sm,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
+    marginTop: SPACING.sm,
   },
+
   price: {
     flex: 1,
-    fontSize: 15,
+    color: COLORS.primary,
+    fontSize: 14,
     fontWeight: '700',
-    color: COLORS.secondary,
   },
+
   addButton: {
-    width: 36,
-    height: 36,
-    borderRadius: RADIUS.round,
-    backgroundColor: COLORS.primary,
+    width: 32,
+    height: 32,
     alignItems: 'center',
     justifyContent: 'center',
+    borderRadius: RADIUS.round,
+    backgroundColor: COLORS.primary,
   },
+
   addText: {
     color: COLORS.surface,
-    fontSize: 24,
+    fontSize: 20,
     fontWeight: '700',
-    lineHeight: 28,
+    lineHeight: 22,
   },
 });

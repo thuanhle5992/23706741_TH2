@@ -1,23 +1,20 @@
-import {create} from 'zustand';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import {create} from 'zustand';
 import {createJSONStorage, persist} from 'zustand/middleware';
 
 import {STUDENT} from '@constants/student';
+import type {Product} from '@services/productApi';
 
-export type CartItem = {
-  id: string;
-  name: string;
-  price: number;
-  image: string;
+export type CartItem = Product & {
   quantity: number;
 };
 
 type CartState = {
   items: CartItem[];
 
-  add: (item: Omit<CartItem, 'quantity'>) => void;
-  remove: (id: string) => void;
-  changeQty: (id: string, quantity: number) => void;
+  addItem: (product: Product) => void;
+  removeItem: (productId: number) => void;
+  changeQty: (productId: number, quantity: number) => void;
 
   totalQuantity: () => number;
   totalAmount: () => number;
@@ -28,21 +25,18 @@ export const useCartStore = create<CartState>()(
     (set, get) => ({
       items: [],
 
-      add: item =>
+      addItem: product => {
         set(state => {
-          const existing = state.items.find(
-            current => current.id === item.id,
+          const existingItem = state.items.find(
+            item => item.id === product.id,
           );
 
-          if (existing) {
+          if (existingItem) {
             return {
-              items: state.items.map(current =>
-                current.id === item.id
-                  ? {
-                      ...current,
-                      quantity: current.quantity + 1,
-                    }
-                  : current,
+              items: state.items.map(item =>
+                item.id === product.id
+                  ? {...item, quantity: item.quantity + 1}
+                  : item,
               ),
             };
           }
@@ -51,49 +45,51 @@ export const useCartStore = create<CartState>()(
             items: [
               ...state.items,
               {
-                ...item,
+                ...product,
                 quantity: 1,
               },
             ],
           };
-        }),
+        });
+      },
 
-      remove: id =>
+      removeItem: productId => {
         set(state => ({
-          items: state.items.filter(
-            item => item.id !== id,
+          items: state.items.filter(item => item.id !== productId),
+        }));
+      },
+
+      changeQty: (productId, quantity) => {
+        if (quantity <= 0) {
+          set(state => ({
+            items: state.items.filter(item => item.id !== productId),
+          }));
+
+          return;
+        }
+
+        set(state => ({
+          items: state.items.map(item =>
+            item.id === productId
+              ? {...item, quantity}
+              : item,
           ),
-        })),
+        }));
+      },
 
-      changeQty: (id, quantity) =>
-        set(state => ({
-          items:
-            quantity <= 0
-              ? state.items.filter(
-                  item => item.id !== id,
-                )
-              : state.items.map(item =>
-                  item.id === id
-                    ? {
-                        ...item,
-                        quantity,
-                      }
-                    : item,
-                ),
-        })),
-
-      totalQuantity: () =>
-        get().items.reduce(
+      totalQuantity: () => {
+        return get().items.reduce(
           (total, item) => total + item.quantity,
           0,
-        ),
+        );
+      },
 
-      totalAmount: () =>
-        get().items.reduce(
-          (total, item) =>
-            total + item.price * item.quantity,
+      totalAmount: () => {
+        return get().items.reduce(
+          (total, item) => total + item.price * item.quantity,
           0,
-        ),
+        );
+      },
     }),
     {
       name: `ktxgo-cart-${STUDENT.mssv}`,

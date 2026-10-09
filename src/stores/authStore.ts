@@ -1,35 +1,36 @@
 import {create} from 'zustand';
-import AsyncStorage from '@react-native-async-storage/async-storage';
-import {createJSONStorage, persist} from 'zustand/middleware';
+
+import {examStamp, STUDENT} from '@constants/student';
 
 type AuthState = {
+  account: string;
+  token: string | null;
   isLoggedIn: boolean;
-  phone: string;
-  login: (phone: string) => void;
+
+  login: (account: string) => void;
   logout: () => void;
 };
 
-export const useAuthStore = create<AuthState>()(
-  persist(
-    set => ({
+export const useAuthStore = create<AuthState>(set => ({
+  account: '',
+  token: null,
+  isLoggedIn: false,
+
+  login: (account: string) => {
+    const token = `ktxgo-${STUDENT.mssv}-${examStamp()}`;
+
+    set({
+      account,
+      token,
+      isLoggedIn: true,
+    });
+  },
+
+  logout: () => {
+    set({
+      account: '',
+      token: null,
       isLoggedIn: false,
-      phone: '',
-
-      login: phone =>
-        set({
-          isLoggedIn: true,
-          phone,
-        }),
-
-      logout: () =>
-        set({
-          isLoggedIn: false,
-          phone: '',
-        }),
-    }),
-    {
-      name: 'ktxgo-auth',
-      storage: createJSONStorage(() => AsyncStorage),
-    },
-  ),
-);
+    });
+  },
+}));

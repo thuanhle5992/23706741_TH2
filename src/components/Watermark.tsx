@@ -1,20 +1,26 @@
 import React from 'react';
 import {StyleSheet, Text, View} from 'react-native';
+import {useSafeAreaInsets} from 'react-native-safe-area-context';
 import {examStamp, STUDENT, VARIANT} from '@constants/student';
+import {COLORS} from '@constants/theme';
 
 export function Watermark() {
+  const insets = useSafeAreaInsets();
+
   return (
     <View
       pointerEvents="none"
       style={[
         styles.container,
         VARIANT.watermarkAtTop
-          ? styles.top
-          : styles.bottom,
+          ? {top: Math.max(insets.top, 6)}
+          : {bottom: Math.max(insets.bottom, 6)},
       ]}>
-      <Text style={styles.text}>
-        TH2 · {STUDENT.mssv} · {STUDENT.hoTen} · #{examStamp()}
-      </Text>
+      <View style={styles.badge}>
+        <Text style={styles.text}>
+          TH2 · {STUDENT.mssv} · {STUDENT.hoTen} · #{examStamp()}
+        </Text>
+      </View>
     </View>
   );
 }
@@ -24,24 +30,26 @@ const styles = StyleSheet.create({
     position: 'absolute',
     left: 0,
     right: 0,
-    zIndex: 100,
+    zIndex: 9999,
     alignItems: 'center',
-    paddingVertical: 4,
   },
-
-  top: {
-    top: 0,
+  badge: {
+    backgroundColor: 'rgba(255, 255, 255, 0.92)',
+    paddingHorizontal: 10,
+    paddingVertical: 3,
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: COLORS.border,
+    shadowColor: '#000',
+    shadowOffset: {width: 0, height: 1},
+    shadowOpacity: 0.1,
+    shadowRadius: 2,
+    elevation: 2,
   },
-
-  bottom: {
-    bottom: 0,
-  },
-
   text: {
-    fontSize: 10,
-    color: '#64748B',
-    backgroundColor: 'rgba(255,255,255,0.85)',
-    paddingHorizontal: 6,
-    paddingVertical: 2,
+    fontSize: 11,
+    fontWeight: '700',
+    color: COLORS.text,
+    letterSpacing: 0.3,
   },
 });

@@ -5,12 +5,15 @@ import AuthStack from '@navigation/AuthStack';
 import MainTabs from '@navigation/MainTabs';
 import {useAuthStore} from '@stores/authStore';
 
-const Stack = createNativeStackNavigator();
+export type RootStackParamList = {
+  Auth: undefined;
+  Main: undefined;
+};
+
+const Stack = createNativeStackNavigator<RootStackParamList>();
 
 export default function RootNavigator() {
-  const isLoggedIn = useAuthStore(
-    state => state.isLoggedIn,
-  );
+  const isLoggedIn = useAuthStore(state => state.isLoggedIn);
 
   return (
     <Stack.Navigator
@@ -18,15 +21,9 @@ export default function RootNavigator() {
         headerShown: false,
       }}>
       {!isLoggedIn ? (
-        <Stack.Screen
-          name="Auth"
-          component={AuthStack}
-        />
+        <Stack.Screen name="Auth" component={AuthStack} />
       ) : (
-        <Stack.Screen
-          name="Main"
-          component={MainTabs}
-        />
+        <Stack.Screen name="Main" component={MainTabs} />
       )}
     </Stack.Navigator>
   );

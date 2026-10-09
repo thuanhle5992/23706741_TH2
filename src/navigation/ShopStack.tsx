@@ -1,26 +1,31 @@
 import React from 'react';
 import {createNativeStackNavigator} from '@react-navigation/native-stack';
 
-import HomeScreen from '@screens/HomeScreen';
+import {VARIANT} from '@constants/student';
+import {HomeScreen} from '@screens/HomeScreen';
 import DetailScreen from '@screens/DetailScreen';
 
-const Stack = createNativeStackNavigator();
+export type ShopStackParamList = {
+  Home: undefined;
+  Detail: {
+    id: string;
+  };
+};
 
-export default function ShopStack() {
+const Stack = createNativeStackNavigator<ShopStackParamList>();
+
+export function ShopStack() {
   return (
-    <Stack.Navigator>
-      <Stack.Screen
-        name="Home"
-        component={HomeScreen}
-        options={{
-          title: 'Cửa hàng',
-        }}
-      />
+    <Stack.Navigator
+      screenOptions={{
+        headerShown: false,
+      }}>
+      <Stack.Screen name="Home" component={HomeScreen} />
       <Stack.Screen
         name="Detail"
         component={DetailScreen}
         options={{
-          title: 'Chi tiết',
+          presentation: VARIANT.detailPresentation,
         }}
       />
     </Stack.Navigator>

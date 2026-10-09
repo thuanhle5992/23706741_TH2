@@ -11,22 +11,31 @@ import {
 } from 'react-native';
 
 import {Watermark} from '@components/Watermark';
-import {COLORS, RADIUS, SPACING} from '@constants/theme';
 import {STUDENT, VARIANT} from '@constants/student';
+import {COLORS, RADIUS, SPACING} from '@constants/theme';
 import {useAuthStore} from '@stores/authStore';
 
 export default function LoginScreen() {
-  const [phone, setPhone] = useState('');
-
+  const [inputValue, setInputValue] = useState('');
   const login = useAuthStore(state => state.login);
 
+  const isEmail = VARIANT.authField === 'email';
+  const fieldLabel = isEmail ? 'Email' : 'Số điện thoại';
+  const placeholderText = isEmail
+    ? `${STUDENT.mssv}@sv.edu.vn`
+    : `09${STUDENT.mssv.slice(-8)}`;
+
   const handleLogin = () => {
-    if (!phone.trim()) {
-      Alert.alert('Thông báo', 'Vui lòng nhập số điện thoại.');
+    const trimmed = inputValue.trim();
+    if (!trimmed) {
+      Alert.alert(
+        'Yêu cầu đăng nhập',
+        `Vui lòng nhập ${fieldLabel.toLowerCase()} để tiếp tục.`,
+      );
       return;
     }
 
-    login(phone.trim());
+    login(trimmed);
   };
 
   return (
@@ -35,39 +44,38 @@ export default function LoginScreen() {
         style={styles.content}
         behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
         <View style={styles.card}>
-          <Text style={styles.title}>KTXGo</Text>
-
+          <Text style={styles.logo}>KTXGO</Text>
           <Text style={styles.subtitle}>
-            Đăng nhập hệ thống KTXGo
+            Giao đồ tận phòng ký túc xá
           </Text>
 
-          <Text style={styles.student}>
-            {STUDENT.hoTen} · {STUDENT.mssv}
-          </Text>
-
-          {VARIANT.authField === 'phone' && (
-            <>
-              <Text style={styles.label}>
-                Số điện thoại
-              </Text>
-
-              <TextInput
-                value={phone}
-                onChangeText={setPhone}
-                placeholder="Nhập số điện thoại"
-                keyboardType="phone-pad"
-                style={styles.input}
-              />
-            </>
-          )}
-
-          <Pressable
-            style={styles.button}
-            onPress={handleLogin}>
-            <Text style={styles.buttonText}>
-              Đăng nhập
+          <View style={styles.studentInfoBadge}>
+            <Text style={styles.studentText}>
+              {STUDENT.hoTen} · {STUDENT.mssv}
             </Text>
+          </View>
+
+          <View style={styles.inputGroup}>
+            <Text style={styles.label}>{fieldLabel}</Text>
+            <TextInput
+              value={inputValue}
+              onChangeText={setInputValue}
+              placeholder={placeholderText}
+              placeholderTextColor={COLORS.textLight}
+              keyboardType={isEmail ? 'email-address' : 'phone-pad'}
+              autoCapitalize="none"
+              autoCorrect={false}
+              style={styles.input}
+            />
+          </View>
+
+          <Pressable style={styles.button} onPress={handleLogin}>
+            <Text style={styles.buttonText}>Vào cửa hàng</Text>
           </Pressable>
+
+          <Text style={styles.footerNote}>
+            Auth Stack · chưa có token
+          </Text>
         </View>
       </KeyboardAvoidingView>
 
@@ -85,7 +93,7 @@ const styles = StyleSheet.create({
   content: {
     flex: 1,
     justifyContent: 'center',
-    padding: SPACING.xl,
+    paddingHorizontal: SPACING.xl,
   },
 
   card: {
@@ -94,34 +102,53 @@ const styles = StyleSheet.create({
     padding: SPACING.xl,
     borderWidth: 1,
     borderColor: COLORS.border,
+    shadowColor: '#000',
+    shadowOffset: {width: 0, height: 2},
+    shadowOpacity: 0.05,
+    shadowRadius: 8,
+    elevation: 3,
   },
 
-  title: {
-    fontSize: 32,
-    fontWeight: '800',
+  logo: {
+    fontSize: 34,
+    fontWeight: '900',
     color: COLORS.primary,
     textAlign: 'center',
+    letterSpacing: 1,
   },
 
   subtitle: {
-    marginTop: SPACING.sm,
-    fontSize: 16,
+    marginTop: SPACING.xs,
+    fontSize: 14,
     color: COLORS.textLight,
     textAlign: 'center',
   },
 
-  student: {
+  studentInfoBadge: {
     marginTop: SPACING.md,
-    fontSize: 13,
+    alignSelf: 'center',
+    backgroundColor: COLORS.background,
+    paddingHorizontal: SPACING.md,
+    paddingVertical: SPACING.xs,
+    borderRadius: RADIUS.round,
+    borderWidth: 1,
+    borderColor: COLORS.border,
+  },
+
+  studentText: {
+    fontSize: 12,
+    fontWeight: '600',
     color: COLORS.text,
-    textAlign: 'center',
+  },
+
+  inputGroup: {
+    marginTop: SPACING.xl,
   },
 
   label: {
-    marginTop: SPACING.xl,
-    marginBottom: SPACING.sm,
+    marginBottom: SPACING.xs,
     fontSize: 14,
-    fontWeight: '600',
+    fontWeight: '700',
     color: COLORS.text,
   },
 
@@ -131,8 +158,9 @@ const styles = StyleSheet.create({
     borderRadius: RADIUS.md,
     paddingHorizontal: SPACING.md,
     paddingVertical: 12,
-    fontSize: 16,
+    fontSize: 15,
     color: COLORS.dark,
+    backgroundColor: '#FFFFFF',
   },
 
   button: {
@@ -141,11 +169,19 @@ const styles = StyleSheet.create({
     borderRadius: RADIUS.md,
     paddingVertical: 14,
     alignItems: 'center',
+    justifyContent: 'center',
   },
 
   buttonText: {
     color: '#FFFFFF',
     fontSize: 16,
     fontWeight: '700',
+  },
+
+  footerNote: {
+    marginTop: SPACING.md,
+    fontSize: 12,
+    color: COLORS.textLight,
+    textAlign: 'center',
   },
 });

@@ -1,97 +1,63 @@
-This is a new [**React Native**](https://reactnative.dev) project, bootstrapped using [`@react-native-community/cli`](https://github.com/react-native-community/cli).
+Họ và tên: LE ANH THU | MSSV: 23706741 | URL clone HTTPS: https://github.com/thuanhle5992/23706741_TH2.git | Stamp: #842066 | Số cuối MSSV: 1 | VARIANT: Dòng tên Dưới, Login phone, Tab Shop trước (shopFirst), Haptic selection, Phí ship B, Detail card
 
-# Getting Started
+# BKT2 — DỰ ÁN KTXGo (REACT NATIVE)
 
-> **Note**: Make sure you have completed the [Set Up Your Environment](https://reactnative.dev/docs/set-up-your-environment) guide before proceeding.
+**Học phần:** Lập trình cho thiết bị di động  
+**Sinh viên:** LE ANH THU  
+**MSSV:** 23706741  
+**Mã Stamp:** #842066  
+**Thư mục dự án:** `KTXGo_23706741`  
+**Package name:** `ktxgo-23706741`  
+**Repository:** [https://github.com/thuanhle5992/23706741_TH2.git](https://github.com/thuanhle5992/23706741_TH2.git)
 
-## Step 1: Start Metro
+---
 
-First, you will need to run **Metro**, the JavaScript build tool for React Native.
+## 1. Thông số định danh & Biến thể (VARIANT)
 
-To start the Metro dev server, run the following command from the root of your React Native project:
+Dựa trên số cuối MSSV: **1** và seed: **741**:
+- **LAST_DIGIT:** `1`
+- **STUDENT_SEED:** `741`
+- **DEBOUNCE_MS:** `300 + (741 % 5) * 100` = `400 ms`
+- **STALE_TIME_MS:** `10_000 + (741 % 20) * 1000` = `11_000 ms` (11 giây)
+- **PRICE_MULTIPLIER:** `15000 + (741 % 40) * 500` = `25_500`
+- **BASE_SHIP_FEE:** `8000 + (741 % 10) * 1000` = `9_000 đ`
+- **ROOM_LABEL:** `P.441`
+- **BANNER_IMAGE_ID:** `341`
+- **VARIANT:**
+  - `watermarkAtTop`: `false` (Dòng tên ở Dưới)
+  - `authField`: `'phone'` (Ô nhập số điện thoại)
+  - `tabOrder`: `'shopFirst'` (Thứ tự tab: Cửa hàng trước, Giỏ, Tôi)
+  - `hapticOnAdd`: `'selection'` (Haptics selection khi thêm giỏ)
+  - `shipFormula`: `'B'` (`BASE_SHIP_FEE + Math.round(km * 1500) + 2000`)
+  - `detailPresentation`: `'card'` (Presentation dạng card)
 
-```sh
-# Using npm
-npm start
+---
 
-# OR using Yarn
-yarn start
-```
+## 2. Kiến trúc & Công nghệ
 
-## Step 2: Build and run your app
+- **React Native CLI + TypeScript**
+- **React Navigation v7:**
+  - `RootNavigator`: điều hướng `Auth` (chưa đăng nhập) và `Main` (đã đăng nhập)
+  - `AuthStack`: Màn hình `LoginScreen`
+  - `ShopStack`: Màn hình `HomeScreen` -> `DetailScreen` (truyền `id`)
+  - `MainTabs`: Tabs động (`Cửa hàng`, `Giỏ`, `Tôi`) theo biến thể `shopFirst`/`cartFirst`
+- **Quản lý trạng thái:**
+  - `Zustand` + `persist` (`AsyncStorage`): Quản lý `cartStore` (key `ktxgo-cart-23706741`)
+  - `authStore`: Quản lý token xác thực giả lập (`ktxgo-23706741-842066`)
+- **Server state & Mạng:**
+  - `TanStack Query` (`useQuery`): fetch dữ liệu món từ FakeStoreAPI với `staleTime: STALE_TIME_MS`
+  - `Axios`: instance với baseURL, timeout và interceptor gắn header `X-Student-Id: 23706741`
+- **Device Native:**
+  - `expo-location`: Luồng xin quyền runtime (3 nhánh `granted`, `denied`, `blocked`), tính khoảng cách Haversine tới KTX và tính phí ship
+  - `expo-haptics`: Rung phản hồi khi bấm nút thêm vào giỏ hàng
+  - `Linking.openSettings`: Mở Cài đặt hệ thống khi quyền vị trí bị `blocked`
+- **Hiệu năng danh sách:**
+  - `@shopify/flash-list`: Lưới 2 cột (`numColumns={2}`), `estimatedItemSize={260}`, pull-to-refresh
+  - Debounce tìm kiếm: `useDebouncedValue` với độ trễ `DEBOUNCE_MS`
 
-With Metro running, open a new terminal window/pane from the root of your React Native project, and use one of the following commands to build and run your Android or iOS app:
+---
 
-### Android
+## 3. Ảnh chụp màn hình máy ảo
 
-```sh
-# Using npm
-npm run android
-
-# OR using Yarn
-yarn android
-```
-
-### iOS
-
-For iOS, remember to install CocoaPods dependencies (this only needs to be run on first clone or after updating native deps).
-
-The first time you create a new project, run the Ruby bundler to install CocoaPods itself:
-
-```sh
-bundle install
-```
-
-Then, and every time you update your native dependencies, run:
-
-```sh
-bundle exec pod install
-```
-
-For more information, please visit [CocoaPods Getting Started guide](https://guides.cocoapods.org/using/getting-started.html).
-
-```sh
-# Using npm
-npm run ios
-
-# OR using Yarn
-yarn ios
-```
-
-If everything is set up correctly, you should see your new app running in the Android Emulator, iOS Simulator, or your connected device.
-
-This is one way to run your app — you can also build it directly from Android Studio or Xcode.
-
-## Step 3: Modify your app
-
-Now that you have successfully run the app, let's make changes!
-
-Open `App.tsx` in your text editor of choice and make some changes. When you save, your app will automatically update and reflect these changes — this is powered by [Fast Refresh](https://reactnative.dev/docs/fast-refresh).
-
-When you want to forcefully reload, for example to reset the state of your app, you can perform a full reload:
-
-- **Android**: Press the <kbd>R</kbd> key twice or select **"Reload"** from the **Dev Menu**, accessed via <kbd>Ctrl</kbd> + <kbd>M</kbd> (Windows/Linux) or <kbd>Cmd ⌘</kbd> + <kbd>M</kbd> (macOS).
-- **iOS**: Press <kbd>R</kbd> in iOS Simulator.
-
-## Congratulations! :tada:
-
-You've successfully run and modified your React Native App. :partying_face:
-
-### Now what?
-
-- If you want to add this new React Native code to an existing application, check out the [Integration guide](https://reactnative.dev/docs/integration-with-existing-apps).
-- If you're curious to learn more about React Native, check out the [docs](https://reactnative.dev/docs/getting-started).
-
-# Troubleshooting
-
-If you're having issues getting the above steps to work, see the [Troubleshooting](https://reactnative.dev/docs/troubleshooting) page.
-
-# Learn More
-
-To learn more about React Native, take a look at the following resources:
-
-- [React Native Website](https://reactnative.dev) - learn more about React Native.
-- [Getting Started](https://reactnative.dev/docs/environment-setup) - an **overview** of React Native and how setup your environment.
-- [Learn the Basics](https://reactnative.dev/docs/getting-started) - a **guided tour** of the React Native **basics**.
-- [Blog](https://reactnative.dev/blog) - read the latest official React Native **Blog** posts.
-- [`@facebook/react-native`](https://github.com/facebook/react-native) - the Open Source; GitHub **repository** for React Native.
+1. Màn hình Cửa hàng (Home): `docs/screenshot-th2-home.png`
+2. Màn hình Giỏ hàng (Cart): `docs/screenshot-th2-cart.png`
