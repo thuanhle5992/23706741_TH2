@@ -6,10 +6,13 @@ import {
   Text,
   View,
 } from 'react-native';
+import * as Haptics from 'expo-haptics';
 
 import {COLORS, RADIUS, SPACING} from '@constants/theme';
+import {VARIANT} from '@constants/student';
+import {useCartStore} from '@stores/cartStore';
 
-type Product = {
+export type Product = {
   id: string;
   name: string;
   price: number;
@@ -25,6 +28,20 @@ export default function ProductCard({
   product,
   onPress,
 }: ProductCardProps) {
+  const add = useCartStore(state => state.add);
+
+  const handleAdd = () => {
+    add(product);
+
+    if (VARIANT.hapticOnAdd === 'selection') {
+      Haptics.selectionAsync();
+    } else {
+      Haptics.impactAsync(
+        Haptics.ImpactFeedbackStyle.Medium,
+      );
+    }
+  };
+
   return (
     <Pressable
       style={styles.card}
@@ -41,9 +58,17 @@ export default function ProductCard({
           {product.name}
         </Text>
 
-        <Text style={styles.price}>
-          {product.price.toLocaleString('vi-VN')} đ
-        </Text>
+        <View style={styles.bottomRow}>
+          <Text style={styles.price}>
+            {product.price.toLocaleString('vi-VN')} đ
+          </Text>
+
+          <Pressable
+            style={styles.addButton}
+            onPress={handleAdd}>
+            <Text style={styles.addText}>+</Text>
+          </Pressable>
+        </View>
       </View>
     </Pressable>
   );
@@ -72,10 +97,30 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     color: COLORS.text,
   },
-  price: {
+  bottomRow: {
     marginTop: SPACING.sm,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+  },
+  price: {
+    flex: 1,
     fontSize: 15,
     fontWeight: '700',
     color: COLORS.secondary,
+  },
+  addButton: {
+    width: 36,
+    height: 36,
+    borderRadius: RADIUS.round,
+    backgroundColor: COLORS.primary,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  addText: {
+    color: COLORS.surface,
+    fontSize: 24,
+    fontWeight: '700',
+    lineHeight: 28,
   },
 });
